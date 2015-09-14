@@ -1,4 +1,4 @@
-# gaussian-process
+# Gaussian Process
 Some of my scratch work with Gaussian Processes
 
 ## Data
