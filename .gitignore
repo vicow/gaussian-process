@@ -1,3 +1,6 @@
+# Project files
+data/kickstarter-etter-cosn2013/*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
