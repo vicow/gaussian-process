@@ -26,6 +26,5 @@ def evaluation():
     assert X.shape[0] == Y.shape[0]
 
 
-
 if __name__ == '__main__':
     evaluation()
