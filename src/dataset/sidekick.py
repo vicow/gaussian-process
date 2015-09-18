@@ -1,6 +1,5 @@
 from dataset import Dataset
 import numpy as np
-import cPickle as cp
 
 
 class Sidekick(Dataset):
@@ -47,12 +46,12 @@ class Sidekick(Dataset):
 
         return data
 
-    def extract_n_projects(self, n=100):
+    def choose_n_projects(self, n=100):
         """
-        Extract n projects randomly form the whole list of projects.
+        Choose n projects randomly form the whole list of projects.
 
         :param n:   Number of projects to extract. If None or negative, take the whole list.
-        :return:    List of n projects.
+        :return:    Corresponding random indices, list of n projects
         """
         ind = np.random.randint(len(self.projects), size=(n,))
         return [self.extract_project(i) for i in ind]
