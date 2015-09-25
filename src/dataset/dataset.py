@@ -1,5 +1,8 @@
 from abc import ABCMeta, abstractmethod
-import cPickle as cp
+try:
+    import cPickle as cp  # Python 2
+except ImportError:
+    import pickle as cp  # Python 3
 
 
 class DatasetABC:

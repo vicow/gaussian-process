@@ -1,3 +1,1 @@
-__author__ = 'victorkristof'
-
-from sidekick import Sidekick
+from .sidekick import Sidekick
