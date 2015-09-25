@@ -1,6 +1,11 @@
-from dataset import Sidekick
+from __future__ import print_function
+from .dataset import Sidekick
 import numpy as np
-import GPy
+try:
+    import GPy
+except ImportError:
+    import sys
+    sys.exit("GPy requires Python 2")
 
 
 def train(X, Y, kernel=None):
