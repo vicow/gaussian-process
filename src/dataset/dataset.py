@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+import numpy as np
 try:
     import cPickle as cp  # Python 2
 except ImportError:
@@ -17,7 +18,24 @@ class DatasetABC:
     data_dir = "../data"
 
     @abstractmethod
-    def load(self): pass
+    def load(self):
+        """
+        Load a dataset.
+        """
+        pass
+
+    @abstractmethod
+    def __getitem__(self, item):
+        """
+        Access a sample from the dataset.
+        """
+        pass
+
+    def __iter__(self):
+        """
+        Iterate over samples in dataset.
+        """
+        pass
 
 
 class Dataset(DatasetABC):
@@ -27,6 +45,23 @@ class Dataset(DatasetABC):
 
     def __init__(self, name):
         self.name = name
+        self.data = []
+
+    def __getitem__(self, item):
+        """
+        Access a sample from the dataset.
+        """
+        return self.data[item]
+
+    def __iter__(self):
+        """
+        Iterate over samples in dataset.
+        """
+        for sample in self.data:
+            yield sample
+
+    def split(self):
+        return self._split(self.data)
 
     @staticmethod
     def _load_binary(file_name):
@@ -49,4 +84,27 @@ class Dataset(DatasetABC):
         """
         with open(file_name, "wb") as f:
             cp.dump(data, f)
+
+    @staticmethod
+    def _split(x, threshold=0.8, shuffle=False):
+        """
+        Split a series x in training and testing set.
+
+        :param x:           Series to split
+        :param threshold:   Threshold to split
+        :param randomize:   Shuffle the series
+        :return:            Train set, test set
+        """
+        x = np.array(x)
+        if shuffle:
+            x.shuffle()
+        train_size = int(np.floor(len(x) * threshold))
+        x_train = x[:train_size]
+        x_test = x[train_size:]
+
+        return x_train, x_test
+
+
+class DatasetError(Exception):
+    def __init__(self): pass
 
