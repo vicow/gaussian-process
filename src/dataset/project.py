@@ -1,13 +1,12 @@
 from .sample import Sample
 import numpy as np
 import matplotlib.pyplot as plt
-#import matplotlib
-#matplotlib.rcParams['figure.figsize'] = (18,8)
-#matplotlib.rcParams['font.size'] = 16
-#matplotlib.rcParams['legend.fontsize'] = 16
+# import matplotlib
+# matplotlib.rcParams['figure.figsize'] = (18,8)
+# matplotlib.rcParams['font.size'] = 16
+# matplotlib.rcParams['legend.fontsize'] = 16
 
 class Project(Sample):
-
     def __init__(self, project, status):
         super(Sample, self).__init__()
         self.data_dir += "/sidekick"
@@ -33,7 +32,7 @@ class Project(Sample):
         :return:            x_train, y_train, x_test, y_test
         """
         x_train, x_test = self._split(x, threshold)
-        y_train, y_test= self._split(y, threshold)
+        y_train, y_test = self._split(y, threshold)
         return x_train, y_train, x_test, y_test
 
     @staticmethod
@@ -47,14 +46,14 @@ class Project(Sample):
         clean = [(0, 0)]
         seen = [0]
         for i in range(1, len(y)):
-            if y[i] != y[i-1]:
-                if i-1 not in seen:
-                    clean.append((i-1, y[i-1]))
-                    seen.append(i-1)
+            if y[i] != y[i - 1]:
+                if i - 1 not in seen:
+                    clean.append((i - 1, y[i - 1]))
+                    seen.append(i - 1)
                 clean.append((i, y[i]))
                 seen.append(i)
         if i not in seen:
-            clean.append((i, y[i-1]))
+            clean.append((i, y[i - 1]))
         l = zip(*clean)
         X = l[0]
         Y = l[1]
@@ -70,8 +69,8 @@ class Project(Sample):
         """
         diff = [(0, 0)]
         for i in range(1, len(Y)):
-            if Y[i] != Y[i-1]:
-                diff.append((i, Y[i] - Y[i-1]))
+            if Y[i] != Y[i - 1]:
+                diff.append((i, Y[i] - Y[i - 1]))
         l = zip(*diff)
         X = l[0]
         Y = l[1]
@@ -108,7 +107,7 @@ class Project(Sample):
         ax1.set_xlabel('Time (uniform samples)')
         # Make the y-axis label and tick labels match the line color.
         ax1.set_ylabel('Pledged money ($)', color='c')
-        ax1.set_ylim([0, max(ax1.get_ylim()[1] + 1, self.goal + self.goal*0.05)])
+        ax1.set_ylim([0, max(ax1.get_ylim()[1] + 1, self.goal + self.goal * 0.05)])
         for tl in ax1.get_yticklabels():
             tl.set_color('c')
 
@@ -122,7 +121,7 @@ class Project(Sample):
 
         # Goal
         line = ax1.axhline(y=self.goal, color="k", linestyle="--", linewidth=2, zorder=0)
-        ax1.text(10, self.goal + self.goal*0.01, "Goal")
+        ax1.text(10, self.goal + self.goal * 0.01, "Goal")
 
         plt.title("Status of project %s" % self.project_id)
         plt.show()
