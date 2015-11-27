@@ -48,7 +48,6 @@ class Sidekick(Dataset):
         for project in self.data:
             yield project
 
-
     ###########
     # Load data
     ###########
@@ -95,6 +94,21 @@ class Sidekick(Dataset):
         """
         ind = np.random.random_integers(len(self.data), size=(n,))
         return self.data[ind]
+
+    def successful(self):
+        """
+        Keep only the successful projects.
+
+        *Note:* Currently, 142 projects in the data have a status of success but their final amount of pledged money
+        is less than 1.0. This is due to bug in the crawler that was down for a few days between the 24th and the 27th
+        of December 2012. The success state is correct, but the amount of money is wrong. We ignore these projects.
+
+        :return: List of successful projects
+        """
+        return [p for p in self if p.successful and p.money[-1] >= 1.0]
+
+    def failed(self):
+        return [p for p in self if not p.successful]
 
     def histogram(self):
         # X, Y = project.difference_series(money)
