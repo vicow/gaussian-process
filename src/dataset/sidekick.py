@@ -85,15 +85,19 @@ class Sidekick(Dataset):
             raise ProjectNotFound("Project %s not found" % project_id)
 
 
-    def choose_n_projects(self, n=100):
+    def choose_n_projects(self, n=100, seed=0):
         """
         Choose n projects randomly form the whole list of projects.
 
         :param n:   Number of projects to extract. If None or negative, take the whole list.
         :return:    Corresponding random indices, list of n projects
         """
-        ind = np.random.random_integers(len(self.data), size=(n,))
-        return self.data[ind]
+        np.random.seed(seed)
+        ind = np.arange(len(self.data))
+        np.random.shuffle(ind)
+        ind = ind[:n]
+        data = np.array(self.data)  # To support n-ary indices
+        return data[ind]
 
     def successful(self):
         """
