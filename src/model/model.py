@@ -23,9 +23,11 @@ class Model(ModelABC):
     def __init__(self, name, X, y):
         self.name = name
         self.X = X
-        self.y = y
+        # Transform to ndarray
+        self.y = np.expand_dims(y, axis=1)
 
 
 class ModelError(Exception):
-    def __init__(self): pass
+    def __init__(self, message):
+        self.message = message
 

@@ -5,14 +5,15 @@ import scipy.linalg as lin
 
 
 class LeastSquaresMixture(Model):
-    def __init__(self, X, y):
+    def __init__(self, X, y, K=2):
         super(LeastSquaresMixture, self).__init__(self.__class__.__name__, X, y)
         self.w = None
         self.pi = None
         self.beta = None
-        self.K = None
+        self.K = K
+        self.trained = False
 
-    def _expectation_maximization(self, K=2, beta=100, lam=0.01, iterations=100, epsilon=1e-4, verbose=False):
+    def _expectation_maximization(self, beta=100, lam=0.01, iterations=100, epsilon=1e-4, verbose=False):
         """
         Compute the weights for a mixture of least squares.
         Source:
@@ -26,49 +27,49 @@ class LeastSquaresMixture(Model):
         :param verbose:     Display some information in the console
         :return:            Weights vectors for each line, pi_k's and beta parameter
         """
+
+        # Get the dimensions
         N = self.X.shape[0]
-        D = self.X.shape[1]
+        D = self.X.shape[1] + 1  # + 1 to take bias into account
 
         if verbose:
-            print("* Starting EM algorithm for mixture of K=%s least squares models" % K)
+            print("* Starting EM algorithm for mixture of K=%s least squares models" % self.K)
             print("* Beta = %s" % beta)
             print("* Lambda = %s" % lam)
             print("* Running at most %s iterations" % iterations)
             print("* Stopping when complete likelihood improves less than %s" % epsilon)
 
-        # Transform to ndarray
-        self.y = np.expand_dims(self.y, axis=1)
-
         # Add one's in order to find w0 (the bias)
         tX = np.concatenate((np.ones((N, 1)), self.X), axis=1)
 
         # Mixture weights
-        pi = np.zeros(K) + .5
+        pi = np.zeros(self.K) + .5
 
         # Expected mixture weights for each data point (responsibilities)
-        gamma = np.zeros((N, K)) + .5
+        #gamma = np.zeros((N, self.K)) + .5
 
         # Regression weights
-        w = np.random.rand(D, K)
+        w = np.random.rand(D, self.K)
+
+        # Initialize likelihood
+        complete_log_likelihood = - np.inf
+        complete_log_likelihood_old = - np.inf
 
         if verbose:
             print("Obj\t\tpi1\t\tpi2\t\tw11\t\tw12\t\tw21\t\tw22\t\tbeta")
 
         for _ in xrange(iterations):
-            # if 0:
-            #     plt.plot(r, np.dot(rx, w1), '-r', alpha=.5)
-            #     plt.plot(r, np.dot(rx, w2), '-g', alpha=.5)
 
             #### E-step
 
             # Compute Likelihood for each data point
-            err = (np.tile(self.y, (1, K)) - np.dot(tX, w)) ** 2                               # y - <w_k, x_n>
+            err = (np.tile(self.y, (1, self.K)) - np.dot(tX, w)) ** 2              # y - <w_k, x_n>
             prbs = - 0.5 * beta * err
-            probabilities = 1 / np.sqrt(2 * np.pi) * np.sqrt(beta) * np.exp(prbs)      # N(y_n | <w_k, x_n>, beta^{-1})
+            probabilities = 1 / np.sqrt(2 * np.pi) * np.sqrt(beta) * np.exp(prbs)  # N(y_n | <w_k, x_n>, beta^{-1})
 
             # Compute expected mixture weights
             gamma = np.tile(pi, (N, 1)) * probabilities
-            gamma /= np.tile(np.sum(gamma, 1), (K, 1)).T
+            gamma /= np.tile(np.sum(gamma, 1), (self.K, 1)).T
 
             #### M-step
 
@@ -76,7 +77,7 @@ class LeastSquaresMixture(Model):
             pi = np.mean(gamma, axis=0)
 
             # Max with respect to the regression weights
-            for k in xrange(K):
+            for k in xrange(self.K):
                 R_k = np.diag(gamma[:, k])
                 R_kX = R_k.dot(tX)
                 L = R_kX.T.dot(tX) + np.eye(2) * lam / beta
@@ -87,10 +88,10 @@ class LeastSquaresMixture(Model):
             beta = float(N / np.sum(gamma * err))
 
             # Evaluate the complete data log-likelihood to test for convergence
-            complete_log_likelihood = np.sum(np.log(np.sum(np.tile(self.pi, (N, 1)) * probabilities, axis=1)))
+            complete_log_likelihood = float(np.sum(np.log(np.sum(np.tile(pi, (N, 1)) * probabilities, axis=1))))
 
             if verbose:
-                print("%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f" % (complete_log_likelihood[0],
+                print("%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f" % (complete_log_likelihood,
                                                                                   pi[0], pi[1],
                                                                                   w[0, 0], w[1, 0],
                                                                                   w[0, 1], w[1, 1],
@@ -103,19 +104,50 @@ class LeastSquaresMixture(Model):
 
             complete_log_likelihood_old = complete_log_likelihood
 
-        return w, pi, beta
+        return w, pi, beta, complete_log_likelihood
 
-    def posterior(self, x_new, y_new, k):
-        tx = np.array([1, x_new])
-        w_k = self.w[:, k]
-        pi_k = self.pi[k]
-        return - pi_k * 0.5 * (np.log(2 * np.pi) - np.log(self.beta) + (y_new - np.dot(w_k, tx))**2 * self.beta)
+    # def posterior(self, x_new, y_new, k):
+    #     tx = np.array([1, x_new])
+    #     w_k = self.w[:, k]
+    #     pi_k = self.pi[k]
+    #     return - pi_k * 0.5 * (np.log(2 * np.pi) - np.log(self.beta) + (y_new - np.dot(w_k, tx))**2 * self.beta)
 
-    def train(self, K=2, beta=100, lam=0.01, iterations=100, epsilon=1e-4, verbose=False):
-        self.w, self.pi, self.beta = self._expectation_maximization(K, beta, lam, iterations, epsilon, verbose)
+    def train(self, beta=100, lam=0.01, iterations=100, epsilon=1e-4, random_restarts=None, seed=None, verbose=False):
+        if seed:
+            np.random.seed(seed)
+        if random_restarts and random_restarts > 0:
+            w_best = None
+            pi_best = None
+            b_best = 0
+            data_likelihood_best = - np.inf
+            for r in range(random_restarts):
+                w, pi, b, data_likelihood = self._expectation_maximization(beta, lam, iterations, epsilon, verbose)
+                if data_likelihood > data_likelihood_best:
+                    print("Improved solution!")
+                    w_best = w
+                    pi_best = pi
+                    b_best = b
+                    data_likelihood_best = data_likelihood
+                self.reset()
+            self.w = w_best
+            self.pi = pi_best
+            self.beta = b_best
+            self.trained = True
+        else:
+            self.w, self.pi, self.beta, _ = self._expectation_maximization(beta, lam, iterations, epsilon, verbose)
+        self.trained = True
+
+    def reset(self):
+        self.w = None
+        self.pi = None
+        self.beta = None
+        self.trained = False
 
     def predict(self, x_new):
-        tx = np.array([1, x_new])
-        y_new = np.dot(tx, self.w)
-        posteriors = []
-        return y_new, posteriors
+        if self.trained:
+            tx = np.array([1, x_new])
+            y_new = np.dot(tx, self.w)
+            posteriors = []
+            return y_new, posteriors
+        else:
+            raise(ModelError("Model not trained"))
