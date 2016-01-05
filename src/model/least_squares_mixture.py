@@ -1,7 +1,10 @@
 from __future__ import print_function
-from .model import Model, ModelError
+
 import numpy as np
 import scipy.linalg as lin
+
+from .utils import ProgressBar
+from .model import Model, ModelError
 
 
 class LeastSquaresMixture(Model):
@@ -46,7 +49,7 @@ class LeastSquaresMixture(Model):
         pi = np.zeros(self.K) + .5
 
         # Expected mixture weights for each data point (responsibilities)
-        #gamma = np.zeros((N, self.K)) + .5
+        gamma = np.zeros((N, self.K)) + .5
 
         # Regression weights
         w = np.random.rand(D, self.K)
@@ -58,7 +61,7 @@ class LeastSquaresMixture(Model):
         if verbose:
             print("Obj\t\tpi1\t\tpi2\t\tw11\t\tw12\t\tw21\t\tw22\t\tbeta")
 
-        for _ in xrange(iterations):
+        for i in xrange(iterations):
 
             #### E-step
 
@@ -80,7 +83,7 @@ class LeastSquaresMixture(Model):
             for k in xrange(self.K):
                 R_k = np.diag(gamma[:, k])
                 R_kX = R_k.dot(tX)
-                L = R_kX.T.dot(tX) + np.eye(2) * lam / beta
+                L = R_kX.T.dot(tX) + np.eye(D) * lam  # also try: lam / beta
                 R = R_kX.T.dot(self.y)
                 w[:, k] = lin.solve(L, R)[:, 0]
 
@@ -116,19 +119,22 @@ class LeastSquaresMixture(Model):
         if seed:
             np.random.seed(seed)
         if random_restarts and random_restarts > 0:
+            bar = ProgressBar(random_restarts, count=True, text="Random restarts")
             w_best = None
             pi_best = None
             b_best = 0
             data_likelihood_best = - np.inf
+            bar.start()
             for r in range(random_restarts):
                 w, pi, b, data_likelihood = self._expectation_maximization(beta, lam, iterations, epsilon, verbose)
                 if data_likelihood > data_likelihood_best:
-                    print("Improved solution!")
+                    # print("Improved solution!")
                     w_best = w
                     pi_best = pi
                     b_best = b
                     data_likelihood_best = data_likelihood
                 self.reset()
+                bar.update(r)
             self.w = w_best
             self.pi = pi_best
             self.beta = b_best
@@ -145,8 +151,13 @@ class LeastSquaresMixture(Model):
 
     def predict(self, x_new):
         if self.trained:
-            tx = np.array([1, x_new])
-            y_new = np.dot(tx, self.w)
+            if type(x_new) is list:
+                tx = np.ones((1, len(x_new) + 1))
+                tx[0, 1:] = x_new
+                y_new = np.dot(tx, self.w)[0]
+            else:
+                tx = np.array([1, x_new])
+                y_new = np.dot(tx, self.w)
             posteriors = []
             return y_new, posteriors
         else:
