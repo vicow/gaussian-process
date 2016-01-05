@@ -22,9 +22,14 @@ class Model(ModelABC):
 
     def __init__(self, name, X, y):
         self.name = name
-        self.X = X
-        # Transform to ndarray
-        self.y = np.expand_dims(y, axis=1)
+        if np.ndim(X) != 2:
+            raise(ModelError("Expecting ndarray for X"))
+        else:
+            self.X = X
+        if np.ndim(y) != 2:
+            raise ModelError("Expecting ndarray for y")
+        else:
+            self.y = y
 
 
 class ModelError(Exception):
