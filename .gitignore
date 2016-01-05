@@ -1,3 +1,6 @@
+# Ignore PDF
+*.pdf
+
 # Project files
 data/sidekick/*
 
