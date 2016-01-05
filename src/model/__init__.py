@@ -1,1 +1,1 @@
-from least_squares_mixture import LeastSquaresMixture
+from .least_squares_mixture import LeastSquaresMixture
