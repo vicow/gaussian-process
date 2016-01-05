@@ -13,6 +13,7 @@ class LeastSquaresMixture(Model):
         self.w = None
         self.pi = None
         self.beta = None
+        self.marginal_likelihood = - np.inf
         self.K = K
         self.trained = False
 
@@ -61,7 +62,7 @@ class LeastSquaresMixture(Model):
         if verbose:
             print("Obj\t\tpi1\t\tpi2\t\tw11\t\tw12\t\tw21\t\tw22\t\tbeta")
 
-        for i in xrange(iterations):
+        for i in range(iterations):
 
             #### E-step
 
@@ -80,7 +81,7 @@ class LeastSquaresMixture(Model):
             pi = np.mean(gamma, axis=0)
 
             # Max with respect to the regression weights
-            for k in xrange(self.K):
+            for k in range(self.K):
                 R_k = np.diag(gamma[:, k])
                 R_kX = R_k.dot(tX)
                 L = R_kX.T.dot(tX) + np.eye(D) * lam  # also try: lam / beta
@@ -120,27 +121,27 @@ class LeastSquaresMixture(Model):
             np.random.seed(seed)
         if random_restarts and random_restarts > 0:
             bar = ProgressBar(random_restarts, count=True, text="Random restarts")
-            w_best = None
-            pi_best = None
-            b_best = 0
-            data_likelihood_best = - np.inf
             bar.start()
+            w = None
+            pi = None
+            b = 0
+            marginal_likelihood = - np.inf
             for r in range(random_restarts):
-                w, pi, b, data_likelihood = self._expectation_maximization(beta, lam, iterations, epsilon, verbose)
-                if data_likelihood > data_likelihood_best:
+                w_new, pi_new, b_new, marginal_likelihood_new = self._expectation_maximization(beta, lam, iterations, epsilon, verbose)
+                if marginal_likelihood_new > self.marginal_likelihood:
                     # print("Improved solution!")
-                    w_best = w
-                    pi_best = pi
-                    b_best = b
-                    data_likelihood_best = data_likelihood
+                    w = w_new
+                    pi = pi_new
+                    b = b_new
+                    marginal_likelihood = marginal_likelihood_new
                 self.reset()
                 bar.update(r)
-            self.w = w_best
-            self.pi = pi_best
-            self.beta = b_best
-            self.trained = True
+            self.w = w
+            self.pi = pi
+            self.beta = b
+            self.marginal_likelihood = marginal_likelihood
         else:
-            self.w, self.pi, self.beta, _ = self._expectation_maximization(beta, lam, iterations, epsilon, verbose)
+            self.w, self.pi, self.beta, self.marginal_likelihood = self._expectation_maximization(beta, lam, iterations, epsilon, verbose)
         self.trained = True
 
     def reset(self):
