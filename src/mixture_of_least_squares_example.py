@@ -42,11 +42,13 @@ plt.plot(r, np.dot(rx, w[0, :]), ':k', linewidth=2)
 plt.plot(r, np.dot(rx, w[1, :]), ':k', linewidth=2)
 
 # Train the model
-lsm = LeastSquaresMixture(X, y, K=2)
+lsm = LeastSquaresMixture(X, np.expand_dims(y, axis=1), K=2)
 lsm.train(beta=0.03, epsilon=1e-10, lam=0, iterations=100, random_restarts=100,  verbose=False)
 
-w1 = lsm.w[:, 0]
-w2 = lsm.w[:, 1]
+w1 = lsm.w[:2, 0]
+w2 = lsm.w[:2, 1]
+print(w1)
+print(w2)
 plt.plot(r, np.dot(rx, w1), '-r')
 plt.plot(r, np.dot(rx, w2), '-g')
 
