@@ -52,23 +52,27 @@ class Sidekick(Dataset):
     # Load data
     ###########
 
-    def load(self):
+    def load(self, light=False):
         """
         Load Sidekick data.
         """
-        print('Loading projects...')
-        projects = np.load('%s/projects.npy' % (self.data_dir, ))
-        print('Loading statuses...')
-        statuses = self._load_binary('%s/statuses.pkl' % (self.data_dir, ))
-        assert(len(projects) == len(statuses))
+        if light:
+            print("Loading light data set (1000 data points)...")
+            self.data = self._load_binary('%s/light.pkl' % self.data_dir)
+        else:
+            print('Loading projects...')
+            projects = np.load('%s/projects.npy' % (self.data_dir, ))
+            print('Loading statuses...')
+            statuses = self._load_binary('%s/statuses.pkl' % (self.data_dir, ))
+            assert(len(projects) == len(statuses))
 
-        print('Converting to project instances...')
-        for i, p in enumerate(projects):
-            project = Project(p, statuses[i])
-            self.data.append(project)
+            print('Converting to project instances...')
+            for i, p in enumerate(projects):
+                project = Project(p, statuses[i])
+                self.data.append(project)
 
-        # Convert to numpy arrays if needed
-        # self.statuses = np.array(self.statuses)
+            # Convert to numpy arrays if needed
+            # self.statuses = np.array(self.statuses)
 
         print("Data loaded.")
 

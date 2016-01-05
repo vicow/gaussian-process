@@ -71,8 +71,13 @@ class Dataset(DatasetABC):
         :param file_name:   Name of file
         :return:            Data in file.
         """
-        with open(file_name, 'rb') as f:
-            return cp.load(f)
+        try:
+            with open(file_name, 'rb') as f:
+                return cp.load(f)
+        except UnicodeDecodeError:  # When loading Python 2 pickle from Python 3
+            with open(file_name, 'rb') as f:
+                return cp.load(f, encoding="latin1")
+
 
     @staticmethod
     def _save_binary(file_name, data):
