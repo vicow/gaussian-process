@@ -145,7 +145,7 @@ class LeastSquaresMixture(Model):
 
             complete_log_likelihood_old = complete_log_likelihood
 
-        print("Hitting maximum iteration (%s)" % self.iterations)
+        # print("Hitting maximum iteration (%s)" % self.iterations)
         return w, pi, gamma, beta, complete_log_likelihood
 
     def train(self, seed=None, verbose=False, silent=False, **kwargs):
@@ -163,9 +163,10 @@ class LeastSquaresMixture(Model):
         if self.random_restarts and self.random_restarts > 0:
             w = pi = gamma = b = None
             marginal_likelihood = - np.inf
-            if not verbose and not silent:
-                bar = ProgressBar(self.random_restarts, count=True, text="Random restarts")
-                bar.start()
+            if not verbose:
+                if not silent:
+                    bar = ProgressBar(self.random_restarts, count=True, text="Random restarts")
+                    bar.start()
             for r in range(self.random_restarts):
                 w_new, pi_new, gamma_new, b_new, marginal_likelihood_new = self._expectation_maximization(verbose=verbose)
                 if marginal_likelihood_new > self.marginal_likelihood:
@@ -175,8 +176,9 @@ class LeastSquaresMixture(Model):
                     gamma = gamma_new
                     b = b_new
                     marginal_likelihood = marginal_likelihood_new
-                if not verbose and not silent:
-                    bar.update(r)
+                if not verbose:
+                    if not silent:
+                        bar.update(r)
             self.w = w
             self.pi = pi
             self.gamma = gamma
@@ -221,8 +223,9 @@ class LeastSquaresMixture(Model):
         se = 0
         accurate = 0
         chosen = Counter()
-        bar = ProgressBar(end_value=X_test.shape[0], text="Data point", count=True)
-        bar.start()
+        if verbose:
+            bar = ProgressBar(end_value=X_test.shape[0], text="Data point", count=True)
+            bar.start()
         for i, x_new in enumerate(X_test):
             y_actual = y_test[i][0]
             y_new, k = self.predict(list(x_new))
@@ -231,7 +234,8 @@ class LeastSquaresMixture(Model):
             se += (y_actual - y_new)**2
             if (y_new >= 1 and y_actual >= 1) or (y_new < 1 and y_actual < 1):
                 accurate += 1
-            bar.update(i)
+            if verbose:
+                bar.update(i)
 
         rmse = np.sqrt(np.mean(se))
         accuracy = accurate / float(y_test.size)
