@@ -31,6 +31,15 @@ class Model(ModelABC):
         else:
             self.y = y
 
+    def _k_fold_generator(self, k_fold):
+        subset_size = int(np.floor(self.X.shape[0] / float(k_fold)))
+        for k in range(k_fold):
+            X_train = np.append(self.X[:k * subset_size, :], self.X[(k + 1) * subset_size:, :], axis=0)
+            X_valid = self.X[k * subset_size:, :][:subset_size, :]
+            y_train = np.append(self.y[:k * subset_size, :], self.y[(k + 1) * subset_size:, :], axis=0)
+            y_valid = self.y[k * subset_size:, :][:subset_size, :]
+            yield X_train, y_train, X_valid, y_valid
+
 
 class ModelError(Exception):
     def __init__(self, message):
