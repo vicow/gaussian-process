@@ -5,9 +5,12 @@ import numpy as np
 
 
 class Sidekick(Dataset):
-    def __init__(self):
+    def __init__(self, data_dir=None):
         super(Sidekick, self).__init__(self.__class__.__name__)
-        self.data_dir += "/sidekick"
+        if data_dir:
+            self.data_dir = data_dir
+        else:
+            self.data_dir += "/sidekick"
 
     ###############
     # Access sample
@@ -60,16 +63,21 @@ class Sidekick(Dataset):
             print("Loading light data set (1000 data points)...")
             self.data = self._load_binary('%s/light.pkl' % self.data_dir)
         else:
-            print('Loading projects...')
-            projects = np.load('%s/projects.npy' % (self.data_dir, ))
-            print('Loading statuses...')
-            statuses = self._load_binary('%s/statuses.pkl' % (self.data_dir, ))
-            assert(len(projects) == len(statuses))
+            print("Loading data set...")
+            self.data = self._load_binary('%s/complete.pkl' % (self.data_dir, ))
 
-            print('Converting to project instances...')
-            for i, p in enumerate(projects):
-                project = Project(p, statuses[i])
-                self.data.append(project)
+            # print('Loading projects...')
+            # projects = np.load('%s/projects.npy' % (self.data_dir, ))
+            # print('Loading statuses...')
+            # statuses = self._load_binary('%s/statuses.pkl' % (self.data_dir, ))
+            # assert(len(projects) == len(statuses))
+            #
+            # print('Converting to project instances...')
+            # for i, p in enumerate(projects):
+            #     project = Project(p, statuses[i])
+            #     self.data.append(project)
+            #
+            # self._save_binary("%s/complete.pkl" % self.data_dir, self.data)
 
             # Convert to numpy arrays if needed
             # self.statuses = np.array(self.statuses)
