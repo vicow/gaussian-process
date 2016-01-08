@@ -140,9 +140,16 @@ class LeastSquaresMixture(Model):
                                                                                   w[0, 0], w[1, 0],
                                                                                   w[0, 1], w[1, 1],
                                                                                   beta))
-            if np.isnan(complete_log_likelihood) \
+            # if np.isnan(complete_log_likelihood) \
+            #             or np.abs(complete_log_likelihood - complete_log_likelihood_old) < self.epsilon:
+            #     return w, pi, gamma, beta, complete_log_likelihood
+            try:
+                if np.isnan(complete_log_likelihood) \
                         or np.abs(complete_log_likelihood - complete_log_likelihood_old) < self.epsilon:
-                return w, pi, gamma, beta, complete_log_likelihood
+                    return w, pi, gamma, beta, complete_log_likelihood
+            except:
+                pass
+
 
             complete_log_likelihood_old = complete_log_likelihood
 
@@ -366,6 +373,7 @@ class LeastSquaresMixture(Model):
         """
         n = self._get_closest_point(X_train, x_new)
         tx = np.ones((1, len(x_new )+ 1))
+        tx[0, 1:] = x_new
         if posteriors:
             y_new = np.dot(tx, self.w)
             normalization = np.sum(self.gamma[n, :])
@@ -414,7 +422,7 @@ class LeastSquaresMixture(Model):
             bar.start()
         for i, x_new in enumerate(X_test):
             y_actual = y_test[i][0]
-            y_new, k = self._predict(X_train, list(x_new))
+            y_new, k = self._predict(X_train, list(x_new), posteriors=False)
             # print("Predicted: %s | Actual: %s" % (y_new, y_actual))
             chosen.update([k])
             se += (y_actual - y_new)**2
