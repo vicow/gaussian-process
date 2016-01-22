@@ -60,8 +60,8 @@ class Dataset(DatasetABC):
         for sample in self.data:
             yield sample
 
-    def split(self):
-        return self._split(self.data)
+    def split(self, threshold=0.8, shuffle=False):
+        return self._split(self.data, threshold, shuffle)
 
     @staticmethod
     def _load_binary(file_name):
@@ -91,7 +91,7 @@ class Dataset(DatasetABC):
             cp.dump(data, f)
 
     @staticmethod
-    def _split(x, threshold=0.8, shuffle=False):
+    def _split(x, threshold, shuffle):
         """
         Split a series x in training and testing set.
 
@@ -102,7 +102,7 @@ class Dataset(DatasetABC):
         """
         x = np.array(x)
         if shuffle:
-            x.shuffle()
+            np.random.shuffle(x)
         train_size = int(np.floor(len(x) * threshold))
         x_train = x[:train_size]
         x_test = x[train_size:]

@@ -5,12 +5,14 @@ import numpy as np
 
 
 class Sidekick(Dataset):
-    def __init__(self, data_dir=None):
+    def __init__(self, data_dir=None, seed=None):
         super(Sidekick, self).__init__(self.__class__.__name__)
         if data_dir:
             self.data_dir = data_dir
         else:
             self.data_dir += "/sidekick"
+        if seed:
+            np.random.seed(seed)
 
     ###############
     # Access sample
