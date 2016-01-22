@@ -58,7 +58,7 @@ class LeastSquaresMixture(Model):
                 description += "\n%s" % self.w
         else:
             description += "Not trained yet"
-        return description + "\n"
+        return description #+ "\n"
 
     def _expectation_maximization(self, X, y, verbose):
         """
@@ -84,7 +84,7 @@ class LeastSquaresMixture(Model):
         tX = np.concatenate((np.ones((N, 1)), X), axis=1)
 
         # Mixture weights
-        pi = np.zeros(self.K) + .5
+        pi = np.zeros(self.K) + 1/float(self.K)
 
         # Expected mixture weights for each data point (responsibilities)
         gamma = np.zeros((N, self.K)) + .5
@@ -100,7 +100,7 @@ class LeastSquaresMixture(Model):
         complete_log_likelihood_old = - np.inf
 
         if verbose:
-            print("Obj\t\tpi1\t\tpi2\t\tw11\t\tw12\t\tw21\t\tw22\t\tbeta")
+            print("Obj\tpi1\tpi2\tw11\tw12\tw21\tw22\tbeta")
 
         for i in range(self.iterations):
 
@@ -135,7 +135,7 @@ class LeastSquaresMixture(Model):
             complete_log_likelihood = float(np.sum(np.log(np.sum(np.tile(pi, (N, 1)) * probabilities, axis=1))))
 
             if verbose:
-                print("%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f" % (complete_log_likelihood,
+                print("%0.2f\t\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f" % (complete_log_likelihood,
                                                                                   pi[0], pi[1],
                                                                                   w[0, 0], w[1, 0],
                                                                                   w[0, 1], w[1, 1],
