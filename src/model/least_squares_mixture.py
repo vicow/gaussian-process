@@ -371,20 +371,30 @@ class LeastSquaresMixture(Model):
         :param posteriors:  Whether or not returning the predictions together with the posterior probabilities
         :return:            Predicted value and index of corresponding mixture component
         """
-        n = self._get_closest_point(X_train, x_new)
+        # n = self._get_closest_point(X_train, x_new)
+        # tx = np.ones((1, len(x_new )+ 1))
+        # tx[0, 1:] = x_new
+        # if posteriors:
+        #     y_new = np.dot(tx, self.w)
+        #     normalization = np.sum(self.gamma[n, :])
+        #     y_posteriors = self.gamma[n, :] / normalization
+        #     return y_new, y_posteriors
+        # else:
+        #     k = np.argmax(self.gamma[n, :])
+        #     w_k = self.w[:, k]
+        #     y_new = np.dot(tx, w_k)[0]
+        #
+        #     return y_new, k
+
         tx = np.ones((1, len(x_new )+ 1))
         tx[0, 1:] = x_new
-        if posteriors:
-            y_new = np.dot(tx, self.w)
-            normalization = np.sum(self.gamma[n, :])
-            y_posteriors = self.gamma[n, :] / normalization
-            return y_new, y_posteriors
-        else:
-            k = np.argmax(self.gamma[n, :])
+        y_new = 0
+        for k in range(self.K):
             w_k = self.w[:, k]
-            y_new = np.dot(tx, w_k)[0]
+            pi_k = self.pi[k]
+            y_new += pi_k * np.dot(tx, w_k)[0]
+        return y_new
 
-            return y_new, k
 
     def predict(self, x_new, posteriors=False):
         """
@@ -416,15 +426,15 @@ class LeastSquaresMixture(Model):
         """
         se = 0
         accurate = 0
-        chosen = Counter()
+        #chosen = Counter()
         if verbose:
             bar = ProgressBar(end_value=X_test.shape[0], text="Data point", count=True)
             bar.start()
         for i, x_new in enumerate(X_test):
             y_actual = y_test[i][0]
-            y_new, k = self._predict(X_train, list(x_new), posteriors=False)
+            y_new = self._predict(X_train, list(x_new), posteriors=False)
             # print("Predicted: %s | Actual: %s" % (y_new, y_actual))
-            chosen.update([k])
+            #chosen.update([k])
             se += (y_actual - y_new)**2
             if (y_new >= 1 and y_actual >= 1) or (y_new < 1 and y_actual < 1):
                 accurate += 1
@@ -437,9 +447,9 @@ class LeastSquaresMixture(Model):
         if verbose:
             print("Accuracy: %s" % accuracy)
             print("RMSE    : %s" % rmse)
-            print("Chosen  : %s" % chosen)
+            #print("Chosen  : %s" % chosen)
 
-        return rmse, accuracy, chosen
+        return rmse, accuracy
 
     def evaluate(self, X_test, y_test, verbose=False):
         """
