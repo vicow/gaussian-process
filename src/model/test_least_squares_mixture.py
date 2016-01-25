@@ -51,7 +51,7 @@ N_train = int(floor(0.8*N))
 def one_run(projects_train, projects_test):
     rmse_run = []
     accuracy_run = []
-    relative_time = np.linspace(0.025, 1, 5)
+    relative_time = np.linspace(0.025, 1, 40)
     bar = ProgressBar(end_value=len(relative_time), text="Observed values", count=True)
     bar.start()
     for i, rel_t in enumerate(relative_time):
@@ -71,6 +71,10 @@ def one_run(projects_train, projects_test):
         y_train = np.expand_dims(np.array([p.money[T] for p in projects_train]), axis=1)
         X_test = np.ndarray(shape=(len(projects_test), t), buffer=np.array([p.money[samples] for p in projects_test]), dtype=float)
         y_test = np.expand_dims(np.array([p.money[T] for p in projects_test]), axis=1)
+
+        X_max = np.max(X_train, axis=0)
+        X_train = X_train / X_max[np.newaxis, :]
+        X_test = X_test / X_max[np.newaxis, :]
 
         # Hyperparameters
         K = 2
@@ -95,13 +99,13 @@ def one_run(projects_train, projects_test):
     return rmse_run, accuracy_run
 
 
-def learning_curve(seed=2):
+def learning_curve(seed=2, runs=10, light=False):
     sk = Sidekick(data_dir=data_dir, seed=seed)
-    sk.load(light=False)
+    sk.load(light=light)
 
     rmse_all = []
     accuracy_all = []
-    for r in range(10):
+    for r in range(runs):
         projects_train, projects_test = sk.split(threshold=0.7, shuffle=True)
         n_test = len(projects_test)
         projects_validation = projects_test[:floor(n_test*3/5)]
@@ -123,7 +127,7 @@ def learning_curve(seed=2):
     return rmse_all, accuracy_all
 
 
-rmse_all, accuracy_all = learning_curve()
+rmse_all, accuracy_all = learning_curve(runs=10, light=False)
 with open('rmse_all.pkl', 'wb') as f:
     cp.dump(rmse_all, f)
 with open('accuracy_all.pkl', 'wb') as f:

@@ -93,14 +93,14 @@ class LeastSquaresMixture(Model):
         w = np.random.rand(D, self.K)
 
         # Precision parameter
-        beta = self.beta
+        beta = np.zeros(self.K) + self.beta
 
         # Initialize likelihood
         complete_log_likelihood = - np.inf
         complete_log_likelihood_old = - np.inf
 
         if verbose:
-            print("Obj\tpi1\tpi2\tw11\tw12\tw21\tw22\tbeta")
+            print("Obj\tpi1\tpi2\tw11\tw12\tw21\tw22\tbeta1\tbeta2")
 
         for i in range(self.iterations):
 
@@ -108,8 +108,8 @@ class LeastSquaresMixture(Model):
 
             # Compute Likelihood for each data point
             err = (np.tile(y, (1, self.K)) - np.dot(tX, w)) ** 2  # y - <w_k, x_n>
-            prbs = - 0.5 * beta * err
-            probabilities = 1 / np.sqrt(2 * np.pi) * np.sqrt(beta) * np.exp(prbs)  # N(y_n | <w_k, x_n>, beta^{-1})
+            prbs = - 0.5 * np.tile(beta, (N, 1)) * err
+            probabilities =  np.tile(np.sqrt(beta), (N, 1)) * np.exp(prbs)  # N(y_n | <w_k, x_n>, beta^{-1})
 
             # Compute expected mixture weights
             gamma = np.tile(pi, (N, 1)) * probabilities
@@ -129,22 +129,23 @@ class LeastSquaresMixture(Model):
                 w[:, k] = lin.solve(L, R)[:, 0]
 
             # Max with respect to the precision term
-            beta = float(N / np.sum(gamma * err))
+            beta = N * pi / np.sum(gamma * err)
 
             # Evaluate the complete data log-likelihood to test for convergence
             complete_log_likelihood = float(np.sum(np.log(np.sum(np.tile(pi, (N, 1)) * probabilities, axis=1))))
 
             if verbose:
-                print("%0.2f\t\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f" % (complete_log_likelihood,
+                print("%0.2f\t\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f" % (complete_log_likelihood,
                                                                                   pi[0], pi[1],
                                                                                   w[0, 0], w[1, 0],
                                                                                   w[0, 1], w[1, 1],
-                                                                                  beta))
+                                                                                  beta[0], beta[1]))
             # if np.isnan(complete_log_likelihood) \
             #             or np.abs(complete_log_likelihood - complete_log_likelihood_old) < self.epsilon:
             #     return w, pi, gamma, beta, complete_log_likelihood
             try:
                 if np.isnan(complete_log_likelihood) \
+                        or complete_log_likelihood < complete_log_likelihood_old \
                         or np.abs(complete_log_likelihood - complete_log_likelihood_old) < self.epsilon:
                     return w, pi, gamma, beta, complete_log_likelihood
             except:
