@@ -1,6 +1,9 @@
 # Ignore PDF
 *.pdf
 
+# Ignore pkl
+*.pkl
+
 # Project files
 data/sidekick/*
 
