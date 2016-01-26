@@ -28,26 +28,6 @@ seed = 2
 N = 1000
 N_train = int(floor(0.8*N))
 
-#N_projects = sk.choose_n_projects(n=N, seed=seed)
-#projects_train = N_projects[:N_train]
-#projects_test = N_projects[N_train:]
-
-# Required to contain the prediction in a reasonable range
-# The problem arises when evaluating the likelihood in the expression for gamma_nk
-#X_max = np.max(X_train, axis=0)
-#X_train = X_train / X_max[np.newaxis, :]
-# Apply same preprocessing to testing set
-#X_test = X_test / X_max[np.newaxis, :]
-
-#y_max = np.max(y_train, axis=0)
-#y_train = y_train / y_max[np.newaxis, :]
-#y_test = y_test / y_max[np.newaxis, :]
-
-
-#print("Training on %s projects" % len(X_train))
-#print("Testing on %s projects" % len(X_test))
-#print("Number of features: %s" % n_samples)
-
 def one_run(projects_train, projects_test):
     rmse_run = []
     accuracy_run = []
@@ -65,7 +45,7 @@ def one_run(projects_train, projects_test):
         T = 999
 
         # Remove outliers
-        projects_train = [p for p in projects_train if p.money[T] < 10]
+        projects_train = [p for p in projects_train if p.money[T] < 10 and p.project_id != "564047599"]
 
         X_train = np.ndarray(shape=(len(projects_train), t), buffer=np.array([p.money[samples] for p in projects_train]), dtype=float)
         y_train = np.expand_dims(np.array([p.money[T] for p in projects_train]), axis=1)
@@ -77,7 +57,7 @@ def one_run(projects_train, projects_test):
         X_test = X_test / X_max[np.newaxis, :]
 
         # Hyperparameters
-        K = 2
+        K = 3
         beta = 1  # 1 / np.var(y_train)
         epsilon = 1e0
         lam = 0
@@ -112,11 +92,6 @@ def learning_curve(seed=2, runs=10, light=False):
         projects_test = projects_test[floor(n_test*3/5):]
 
         rmse_run, accuracy_run = one_run(projects_train, projects_test)
-        with open('rmse_run.pkl', 'wb') as f:
-            cp.dump(rmse_all, f)
-        with open('accuracy_run.pkl', 'wb') as f:
-            cp.dump(accuracy_all, f)
-
         rmse_all.append(rmse_run)
         accuracy_all.append(accuracy_run)
         with open('rmse_all.pkl', 'wb') as f:
