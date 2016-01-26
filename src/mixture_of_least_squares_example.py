@@ -44,6 +44,7 @@ plt.plot(r, np.dot(rx, w[1, :]), ':k', linewidth=2)
 # Train the model
 lsm = LeastSquaresMixture(X, np.expand_dims(y, axis=1), K=2)
 lsm.train(beta=0.03, epsilon=1e-10, lam=0, iterations=100, random_restarts=100,  verbose=False)
+print(lsm)
 
 w1 = lsm.w[:2, 0]
 w2 = lsm.w[:2, 1]
@@ -53,17 +54,12 @@ plt.plot(r, np.dot(rx, w1), '-r')
 plt.plot(r, np.dot(rx, w2), '-g')
 
 # New point to display
-x_new = 0.9
-y_new, _ = lsm.predict(x_new)
-y_new1 = y_new[0]
-y_new2 = y_new[1]
-pi1 = lsm.pi[0]
-pi2 = lsm.pi[1]
-y_hat = pi1 * y_new1 + pi2 * y_new2
+x_new = [0.9]
+y_new = lsm.predict(x_new)
 
-x_red = plt.plot(x_new, y_new1, 'rx', mew=4, ms=10)
-x_green = plt.plot(x_new, y_new2, 'gx', mew=4, ms=10)
-x_black = plt.plot(x_new, y_hat, 'kx', mew=4, ms=10)
+# x_red = plt.plot(x_new, y_new, 'rx', mew=4, ms=10)
+# x_green = plt.plot(x_new, y_new, 'gx', mew=4, ms=10)
+x_black = plt.plot(x_new, y_new, 'kx', mew=4, ms=10)
 
 # likelihood_red = log_likelihood(x_new, y_hat, w1, beta)
 # likelihood_green = log_likelihood(x_new, y_hat, w2, beta)
