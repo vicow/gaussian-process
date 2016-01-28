@@ -387,7 +387,7 @@ class LeastSquaresMixture(Model):
         #
         #     return y_new, k
 
-        tx = np.ones((1, len(x_new )+ 1))
+        tx = np.ones((1, len(x_new ) + 1))
         tx[0, 1:] = x_new
         y_new = 0
         for k in range(self.K):
@@ -425,7 +425,9 @@ class LeastSquaresMixture(Model):
         :param verbose: Display details during the evaluation
         :return:        Total RMSE, accuracy and a counter of chosen mixture components
         """
-        se = 0
+        se_failed = []
+        se_success = []
+        se_total = []
         accurate = 0
         #chosen = Counter()
         if verbose:
@@ -436,21 +438,30 @@ class LeastSquaresMixture(Model):
             y_new = self._predict(X_train, list(x_new), posteriors=False)
             # print("Predicted: %s | Actual: %s" % (y_new, y_actual))
             #chosen.update([k])
-            se += (y_actual - y_new)**2
+            se = (y_actual - y_new)**2
+            se_total.append(se)
+            if y_actual >= 1.0:
+                se_success.append(se)
+            else:
+                se_failed.append(se)
             if (y_new >= 1 and y_actual >= 1) or (y_new < 1 and y_actual < 1):
                 accurate += 1
             if verbose:
                 bar.update(i)
 
-        rmse = np.sqrt(np.mean(se))
+        rmse_failed = np.sqrt(np.mean(se_failed))
+        rmse_success = np.sqrt(np.mean(se_success))
+        rmse = np.sqrt(np.mean(se_total))
         accuracy = accurate / float(y_test.size)
 
         if verbose:
-            print("Accuracy: %s" % accuracy)
-            print("RMSE    : %s" % rmse)
+            print("Accuracy     : %s" % accuracy)
+            print("RMSE         : %s" % rmse)
+            print("RMSE failed  : %s" % rmse_failed)
+            print("RMSE success : %s" % rmse_success)
             #print("Chosen  : %s" % chosen)
 
-        return rmse, accuracy
+        return rmse_failed, rmse_success, rmse, accuracy
 
     def evaluate(self, X_test, y_test, verbose=False):
         """
