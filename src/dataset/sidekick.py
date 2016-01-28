@@ -84,6 +84,9 @@ class Sidekick(Dataset):
             # Convert to numpy arrays if needed
             # self.statuses = np.array(self.statuses)
 
+        # Remove the one that have bugs due to the crawler or kickstarter
+        self.data = [p for p in self.data if p.project_id != "564047599"]
+        self.data = [p for p in self.data if (p.successful and p.money[-1] >= 1.0) or (not p.successful and p.money[-1] < 1.0)]
         print("Data loaded.")
 
     def _load_project(self, project_id):
@@ -99,14 +102,13 @@ class Sidekick(Dataset):
             raise ProjectNotFound("Project %s not found" % project_id)
 
 
-    def choose_n_projects(self, n=100, seed=0):
+    def choose_n_projects(self, n=100):
         """
         Choose n projects randomly form the whole list of projects.
 
         :param n:   Number of projects to extract. If None or negative, take the whole list.
         :return:    Corresponding random indices, list of n projects
         """
-        np.random.seed(seed)
         ind = np.arange(len(self.data))
         np.random.shuffle(ind)
         ind = ind[:n]
@@ -123,7 +125,7 @@ class Sidekick(Dataset):
 
         :return: List of successful projects
         """
-        return [p for p in self if p.successful and p.money[-1] >= 1.0]
+        return [p for p in self if p.successful]
 
     def failed(self):
         return [p for p in self if not p.successful]

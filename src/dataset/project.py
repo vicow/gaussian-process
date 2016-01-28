@@ -90,13 +90,13 @@ class Project(Sample):
         X_new.sort()
         return X_new, Y[X_new]
 
-    def plot(self):
+    def plot(self, file_name=None):
         """
         Plot status of current project.
 
         :return:
         """
-        x = np.arange(len(self.money))
+        x = np.linspace(0, 1, len(self.money))
 
         print("Goal: $%s" % self.goal)
         print("Pledged: $%s" % int(self.money[-1] * self.goal))
@@ -104,7 +104,7 @@ class Project(Sample):
         # Pledged money
         fig, ax1 = plt.subplots()
         ax1.plot(x, self.money * self.goal, 'c-')
-        ax1.set_xlabel('Time (uniform samples)')
+        ax1.set_xlabel('Relative time')
         # Make the y-axis label and tick labels match the line color.
         ax1.set_ylabel('Pledged money ($)', color='c')
         ax1.set_ylim([0, max(ax1.get_ylim()[1] + 1, self.goal + self.goal * 0.05)])
@@ -121,9 +121,11 @@ class Project(Sample):
 
         # Goal
         line = ax1.axhline(y=self.goal, color="k", linestyle="--", linewidth=2, zorder=0)
-        ax1.text(10, self.goal + self.goal * 0.01, "Goal")
+        ax1.text(0.01, self.goal + self.goal * 0.01, "Goal")
 
-        plt.title("Status of project %s" % self.project_id)
+        plt.title("Trajectory of project %s" % self.project_id)
+        if file_name:
+            plt.savefig(file_name)
         plt.show()
 
     def save(self):
