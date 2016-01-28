@@ -4,6 +4,9 @@
 # Ignore pkl
 *.pkl
 
+# Ignore Vincent raw data
+data/vincent/result*
+
 # Project files
 data/sidekick/*
 

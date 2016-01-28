@@ -1,0 +1,1 @@
+scp icsil1-access1.epfl.ch:/home/90days/vetter/kickstarter/outputs/2013.06.12-combiner-svm/results_C=100.0_action=predict_combiner=svm_gamma=0.1_n=10_nobaseline=False_p=* vincent
