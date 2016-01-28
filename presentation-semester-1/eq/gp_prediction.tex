@@ -1,0 +1,12 @@
+\documentclass[10pt]{article}
+\usepackage[usenames]{color} %pour la couleur
+\usepackage{amssymb} %maths
+\usepackage{amsmath} %maths
+\usepackage[utf8]{inputenc} %utile pour taper directement les caractères accentués
+\begin{document}
+\begin{eqnarray*}
+\mathbf{f}_* \mid X, \mathbf{y}, X_* &\sim& \mathcal{N}\left(\overline{\mathbf{f}}_*, \text{ cov}(\mathbf{f}_*)  \right) \\
+\overline{\mathbf{f}}_* &=& K(X_*, X) \left[ K(X, X) + \sigma_n^2I \right]^{-1}\mathbf{y} \\
+\text{cov}(\mathbf{f}_*) &=& K(X_*, X_*) - K(X_*, X)\left[ K(X, X) + \sigma_n^2I \right]^{-1}K(X, X_*)
+\end{eqnarray*}
+\end{document}

@@ -1,0 +1,18 @@
+\documentclass[10pt]{article}
+\usepackage[usenames]{color} %pour la couleur
+\usepackage{amssymb} %maths
+\usepackage{amsmath} %maths
+\usepackage[utf8]{inputenc} %utile pour taper directement les caractères accentués
+\begin{document}
+\begin{align*}\begin{bmatrix}
+  \mathbf{y} \\
+  \mathbf{f}_*
+\end{bmatrix}
+\sim 
+\mathcal{N} \left( \mathbf{0},
+\begin{bmatrix}
+  K(X, X) + \sigma_n^2I & K(X, X_*) \\
+  K(X_*, X) & K(X_*, X_*)
+\end{bmatrix}
+\right)\end{align*}
+\end{document}
