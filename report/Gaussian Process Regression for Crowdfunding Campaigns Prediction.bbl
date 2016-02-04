@@ -1,0 +1,34 @@
+\begin{thebibliography}{1}
+
+\bibitem{Bishop:2006:PRM:1162264}
+Christopher~M. Bishop.
+\newblock {\em Pattern Recognition and Machine Learning (Information Science
+  and Statistics)}.
+\newblock Springer-Verlag New York, Inc., Secaucus, NJ, USA, 2006.
+
+\bibitem{etter2013cosn}
+Vincent Etter, Matthias Grossglauser, and Patrick Thiran.
+\newblock Launch hard or go home! predicting the success of kickstarter
+  campaigns.
+\newblock In {\em Proceedings of the first ACM Conference on Online Social
+  Networks}, COSN '13, 2013.
+
+\bibitem{DBLP:journals/corr/FarajtabarWGLZS15}
+Mehrdad Farajtabar, Yichen Wang, Manuel Gomez{-}Rodriguez, Shuang Li, Hongyuan
+  Zha, and Le~Song.
+\newblock {COEVOLVE:} {A} joint point process model for information diffusion
+  and network co-evolution.
+\newblock {\em CoRR}, abs/1507.02293, 2015.
+
+\bibitem{10.3389/fncom.2014.00038}
+Danilo Jimenez~Rezende and Wulfram Gerstner.
+\newblock Stochastic variational learning in recurrent spiking networks.
+\newblock {\em Frontiers in Computational Neuroscience}, 8(38), 2014.
+
+\bibitem{Rasmussen:2005:GPM:1162254}
+Carl~Edward Rasmussen and Christopher K.~I. Williams.
+\newblock {\em Gaussian Processes for Machine Learning (Adaptive Computation
+  and Machine Learning)}.
+\newblock The MIT Press, 2005.
+
+\end{thebibliography}
