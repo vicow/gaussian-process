@@ -1,1 +1,1 @@
-from .least_squares_mixture import LeastSquaresMixture
+from .linear_regressions_mixture import LeastSquaresMixture
