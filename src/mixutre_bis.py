@@ -44,9 +44,9 @@ def em():
     # precision term for the probability of the data under the regression function
     eta = 100
 
-    print "Obj\t\tpi1\t\tpi2\t\tw11\t\tw12\t\tw21\t\tw22\t\teta"
+    print("Obj\t\tpi1\t\tpi2\t\tw11\t\tw12\t\tw21\t\tw22\t\teta")
 
-    for _ in xrange(1):
+    for _ in range(1):
         if 0:
             plt.plot(r, np.dot(rx, w1), '-r', alpha=.5)
             plt.plot(r, np.dot(rx, w2), '-g', alpha=.5)
@@ -93,8 +93,8 @@ def em():
 
         oldobj = obj
 
-        print "%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f" % (
-        obj, rpi[0], rpi[1], w1[0], w1[1], w2[0], w2[1], eta)
+        print("%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f" % (
+        obj, rpi[0], rpi[1], w1[0], w1[1], w2[0], w2[1], eta))
 
     return w1, w2
 

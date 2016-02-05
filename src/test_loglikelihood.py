@@ -5,7 +5,7 @@ import matplotlib
 import numpy as np
 import scipy as sp
 import GPy
-import cPickle as cp
+import pickle as cp
 import matplotlib.pyplot as plt
 from math import floor
 from dataset import Sidekick
@@ -25,19 +25,19 @@ def predict_total_pledged(project, t, samples, m_s_test, m_f_test, pi, X, y):
     l_s = m_s_test.rbf.lengthscale
     sigma_f_s = m_s_test.rbf.variance
     sigma_n_s = m_s_test.Gaussian_noise.variance
-    mean_s, var_s, likelihood_s = gaussian_process_regression(X, y, X_observed, k,
+    mean_s, var_s, likelihood_s, lml_s_pred = gaussian_process_regression(X, y, X_observed, k,
                                                               l=l_s,
                                                               sigma_n=sigma_n_s,
                                                               sigma_f=sigma_f_s)
     l_f = m_f_test.rbf.lengthscale
     sigma_f_f = m_f_test.rbf.variance
     sigma_n_f = m_f_test.Gaussian_noise.variance
-    mean_f, var_f, likelihood_f = gaussian_process_regression(X, y, X_observed, k,
+    mean_f, var_f, likelihood_f, lml_f_pred = gaussian_process_regression(X, y, X_observed, k,
                                                               l=l_f,
                                                               sigma_n=sigma_n_f,
                                                               sigma_f=sigma_f_f)
-    print mean_s, var_s, likelihood_s
-    print mean_f, var_f, likelihood_f
+    print(mean_s, var_s, likelihood_s)
+    print(mean_f, var_f, likelihood_f)
 
     return likelihood_s > likelihood_f
 
@@ -110,8 +110,8 @@ if __name__ == '__main__':
     #model.optimize()
     #print model
 
-    print "Mean\t\tVariance\tLog-likelihood\tLog-likelihood prediction"
+    print("Mean\t\tVariance\tLog-likelihood\tLog-llh prediction")
     m, v, l, l_pred = gaussian_process_regression(X, y, x_test, sigma_n=0.01, sigma_f=1)
-    print "%0.6f\t%0.6f\t%0.6f\t%0.6f" % (m[0], v[0][0], l, l_pred)
+    print("%0.6f\t%0.6f\t%0.6f\t%0.6f" % (m[0], v[0][0], l, l_pred))
     m, v, l, l_pred = gaussian_process_regression(X, y, x_test, sigma_n=1, sigma_f=5)
-    print "%0.6f\t%0.6f\t%0.6f\t%0.6f" % (m[0], v[0][0], l, l_pred)
+    print("%0.6f\t%0.6f\t%0.6f\t%0.6f" % (m[0], v[0][0], l, l_pred))
