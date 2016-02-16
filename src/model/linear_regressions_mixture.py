@@ -1,10 +1,8 @@
 from __future__ import print_function
 import numpy as np
 import scipy.linalg as lin
-import pickle as cp
 from .utils import ProgressBar
 from .model import Model, ModelError
-from collections import Counter
 
 
 class LeastSquaresMixture(Model):
@@ -33,10 +31,10 @@ class LeastSquaresMixture(Model):
 
         # Model parameters
         self.N, self.D = X.shape
-        self.w = np.zeros((self.D, K))
+        self.w = np.zeros((self.D + 1, K))
         self.pi = np.zeros(K)
         self.gamma = np.zeros((self.N, K))
-        self.beta = beta
+        self.beta = np.zeros(self.K) + beta
         self.marginal_likelihood = - np.inf
         self.trained = False
         self.random_restarts = random_restarts
@@ -100,7 +98,14 @@ class LeastSquaresMixture(Model):
         complete_log_likelihood_old = - np.inf
 
         if verbose:
-            print("Obj\tpi1\tpi2\tw11\tw12\tw21\tw22\tbeta1\tbeta2")
+            display_format = "{:>10}" * (1 + self.K * 2 + self.K * 2)
+            print(display_format.format("Obj", "pi1", "pi2", "w11", "w12", "w21", "w22", "beta1", "beta2"))
+            display_format = "{:>10.2f}" * (1 + self.K * 2 + self.K * 2) # obj + pi's + w's + beta's
+            print(display_format.format(complete_log_likelihood,
+                                            pi[0], pi[1],
+                                            w[0, 0], w[1, 0],
+                                            w[0, 1], w[1, 1],
+                                            beta[0], beta[1]))
 
         for i in range(self.iterations):
 
@@ -135,11 +140,12 @@ class LeastSquaresMixture(Model):
             complete_log_likelihood = float(np.sum(np.log(np.sum(np.tile(pi, (N, 1)) * probabilities, axis=1))))
 
             if verbose:
-                print("%0.2f\t\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f" % (complete_log_likelihood,
-                                                                                  pi[0], pi[1],
-                                                                                  w[0, 0], w[1, 0],
-                                                                                  w[0, 1], w[1, 1],
-                                                                                  beta[0], beta[1]))
+                display_format = "{:>10.2f}" * (1 + self.K * 2 + self.K * 2) # obj + pi's + w's + beta's
+                print(display_format.format(complete_log_likelihood,
+                                            pi[0], pi[1],
+                                            w[0, 0], w[1, 0],
+                                            w[0, 1], w[1, 1],
+                                            beta[0], beta[1]))
             # if np.isnan(complete_log_likelihood) \
             #             or np.abs(complete_log_likelihood - complete_log_likelihood_old) < self.epsilon:
             #     return w, pi, gamma, beta, complete_log_likelihood
