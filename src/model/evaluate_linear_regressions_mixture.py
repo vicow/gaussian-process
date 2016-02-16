@@ -33,7 +33,7 @@ def one_run(projects_train, projects_test, outlier_threshold, granularity):
     bar.start()
     for i, rel_t in enumerate(relative_time):
         # Data
-        t = 800
+        t = int(np.ceil(rel_t * 999))
         samples = subsample(t, granularity)
         t = len(samples)
         T = 999
@@ -72,6 +72,8 @@ def one_run(projects_train, projects_test, outlier_threshold, granularity):
         accuracy_run.append(accuracy)
 
         bar.update(i)
+
+    print(accuracy_run)
 
     return rmse_failed_run, rmse_success_run, rmse_run, accuracy_run
 
