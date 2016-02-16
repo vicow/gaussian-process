@@ -12,39 +12,40 @@ from utils import ProgressBar
 
 data_dir = "../../data/sidekick"
 
-def subsample(t0, t1, n_samples):
-    t = t1 - t0
-    if n_samples >= t:
-        return range(t0, t1)
-    samples = range(t0, t1, int(np.ceil(t / float(n_samples))))
-    return samples
+def subsample(t, granularity):
+    if granularity > 1.0 or granularity <= 0:
+        raise ValueError("granularity must be in ]0, 1]")
+    t0 = 1
+    n_samples = int(np.ceil(granularity * t))
+    if n_samples == 1:
+        return [t]
+    else:
+        return np.linspace(t0, t, n_samples, dtype=int)
 
-def one_run(projects_train, projects_test, outlier_threshold):
+
+def one_run(projects_train, projects_test, outlier_threshold, granularity):
     rmse_failed_run = []
     rmse_success_run = []
     rmse_run = []
     accuracy_run = []
-    relative_time = np.linspace(0.025, 1, 40)
+    relative_time = np.linspace(0.025, 1, 20)
     bar = ProgressBar(end_value=len(relative_time), text="Time steps", count=True)
     bar.start()
     for i, rel_t in enumerate(relative_time):
         # Data
-        #t0 = 1
-        #n_samples = 1
-        #samples = subsample(t0, t1, n_samples)
-        #t = len(samples)
-        samples = rel_t * 1000 - 1
-        t = 1
+        t = 800
+        samples = subsample(t, granularity)
+        t = len(samples)
         T = 999
 
         # Remove outliers
-        projects_train = [p for p in projects_train if p.money[T] < outlier_threshold and p.money[samples] < outlier_threshold]
-        projects_test = [p for p in projects_test if p.money[T] < outlier_threshold and p.money[samples] < outlier_threshold]
+        projects_train_filtered = [p for p in projects_train if np.all((p.money[T] - outlier_threshold) <= 0) and np.all((p.money[samples] - outlier_threshold) <= 0)]
+        projects_test_filtered = [p for p in projects_test if np.all((p.money[T] - outlier_threshold) <= 0) and np.all((p.money[samples] - outlier_threshold) <= 0)]
 
-        X_train = np.ndarray(shape=(len(projects_train), t), buffer=np.array([p.money[samples] for p in projects_train]), dtype=float)
-        y_train = np.expand_dims(np.array([p.money[T] for p in projects_train]), axis=1)
-        X_test = np.ndarray(shape=(len(projects_test), t), buffer=np.array([p.money[samples] for p in projects_test]), dtype=float)
-        y_test = np.expand_dims(np.array([p.money[T] for p in projects_test]), axis=1)
+        X_train = np.ndarray(shape=(len(projects_train_filtered), t), buffer=np.array([p.money[samples] for p in projects_train_filtered]), dtype=float)
+        y_train = np.expand_dims(np.array([p.money[T] for p in projects_train_filtered]), axis=1)
+        X_test = np.ndarray(shape=(len(projects_test_filtered), t), buffer=np.array([p.money[samples] for p in projects_test_filtered]), dtype=float)
+        y_test = np.expand_dims(np.array([p.money[T] for p in projects_test_filtered]), axis=1)
 
         #X_max = np.max(X_train, axis=0)
         #X_train = X_train / X_max[np.newaxis, :]
@@ -52,10 +53,10 @@ def one_run(projects_train, projects_test, outlier_threshold):
 
         # Hyperparameters
         K = 2
-        beta = 1 / np.var(y_train)
+        beta = 0.0001
         epsilon = 1e0
         lam = 0
-        iterations = 1000
+        iterations = 25
         random_restarts = None
 
         mls = LeastSquaresMixture(X_train, y_train,
@@ -75,7 +76,7 @@ def one_run(projects_train, projects_test, outlier_threshold):
     return rmse_failed_run, rmse_success_run, rmse_run, accuracy_run
 
 
-def learning_curve(seed=2, runs=10, light=False, outlier_threshold=10):
+def learning_curve(seed=2, runs=10, light=False, outlier_threshold=10, granularity=1.0):
     sk = Sidekick(data_dir=data_dir, seed=seed)
     sk.load(light=light)
 
@@ -89,24 +90,25 @@ def learning_curve(seed=2, runs=10, light=False, outlier_threshold=10):
         projects_validation = projects_test[:floor(n_test*3/5)]
         projects_test = projects_test[floor(n_test*3/5):]
 
-        rmse_failed_run, rmse_success_run, rmse_run, accuracy_run = one_run(projects_train, projects_test, outlier_threshold)
-        rmse_failed_all.append(rmse_failed_run)
-        rmse_success_all.append(rmse_success_run)
+        _, _, rmse_run, accuracy_run = one_run(projects_train, projects_test, outlier_threshold, granularity)
+        # rmse_failed_all.append(rmse_failed_run)
+        # rmse_success_all.append(rmse_success_run)
         rmse_all.append(rmse_run)
         accuracy_all.append(accuracy_run)
-        with open('rmse_failed_outlier_%s.pkl' % outlier_threshold, 'wb') as f:
-            cp.dump(rmse_failed_all, f)
-        with open('rmse_success_outlier_%s.pkl' % outlier_threshold, 'wb') as f:
-            cp.dump(rmse_success_all, f)
-        with open('rmse_outlier_%s.pkl' % outlier_threshold, 'wb') as f:
+        # with open('rmse_failed_outlier_%s.pkl' % outlier_threshold, 'wb') as f:
+        #     cp.dump(rmse_failed_all, f)
+        # with open('rmse_success_outlier_%s.pkl' % outlier_threshold, 'wb') as f:
+        #     cp.dump(rmse_success_all, f)
+        with open('rmse_outlier_%s_granularity_%s.pkl' % (outlier_threshold, granularity), 'wb') as f:
             cp.dump(rmse_all, f)
-        with open('accuracy_outlier_%s.pkl' % outlier_threshold, 'wb') as f:
+        with open('accuracy_outlier_%s_granularity_%s.pkl' % (outlier_threshold, granularity), 'wb') as f:
             cp.dump(accuracy_all, f)
 
     return rmse_failed_all, rmse_success_all, rmse_all, accuracy_all
 
-
+# Granularity: [0.001, 0.01, 0.1, 0.25, 0.5, 0.8, 1]
 rmse_failed_all, rmse_success_all, rmse_all, accuracy_all = learning_curve(seed=2,
                                                                            runs=10,
                                                                            light=False,
-                                                                           outlier_threshold=2)
+                                                                           outlier_threshold=2,
+                                                                           granularity=0.001)
