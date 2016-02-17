@@ -98,9 +98,9 @@ class LeastSquaresMixture(Model):
         complete_log_likelihood_old = - np.inf
 
         if verbose:
-            display_format = "{:>10}" * (1 + self.K * 2 + self.K * 2)
+            display_format = "{:>10}" * (1 + 2 * 2 + 2 * 2)
             print(display_format.format("Obj", "pi1", "pi2", "w11", "w12", "w21", "w22", "beta1", "beta2"))
-            display_format = "{:>10.2f}" * (1 + self.K * 2 + self.K * 2) # obj + pi's + w's + beta's
+            display_format = "{:>10.2f}" * (1 + 2 * 2 + 2 * 2) # obj + pi's + w's + beta's
             print(display_format.format(complete_log_likelihood,
                                             pi[0], pi[1],
                                             w[0, 0], w[1, 0],
@@ -140,7 +140,7 @@ class LeastSquaresMixture(Model):
             complete_log_likelihood = float(np.sum(np.log(np.sum(np.tile(pi, (N, 1)) * probabilities, axis=1))))
 
             if verbose:
-                display_format = "{:>10.2f}" * (1 + self.K * 2 + self.K * 2) # obj + pi's + w's + beta's
+                display_format = "{:>10.2f}" * (1 + 2 * 2 + 2 * 2) # obj + pi's + w's + beta's
                 print(display_format.format(complete_log_likelihood,
                                             pi[0], pi[1],
                                             w[0, 0], w[1, 0],
