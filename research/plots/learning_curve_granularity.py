@@ -1,10 +1,10 @@
 import matplotlib
-matplotlib.use('TKAgg')
+#matplotlib.use('TKAgg')
 import matplotlib.pyplot as plt
 import pickle as cp
 import numpy as np
 
-x = np.linspace(0.025, 1, 40)
+x = np.linspace(0.025, 1, 20)
 
 # Final learning curve
 
@@ -20,7 +20,11 @@ with open("data/accuracy_outlier_2_granularity_0.1.pkl", 'rb') as f:
     a4 = cp.load(f)
 with open("data/accuracy_outlier_2_granularity_0.25.pkl", 'rb') as f:
     a5 = cp.load(f)
-print(a2)
+with open("data/accuracy_outlier_2_granularity_0.5.pkl", 'rb') as f:
+    a6= cp.load(f)
+with open("data/accuracy_outlier_2_granularity_1.pkl", 'rb') as f:
+    a7 = cp.load(f)
+
 # Vincent's data
 #a_median.append(100)
 #a_median = np.array(a_median) / 100
@@ -37,17 +41,21 @@ a4_median = np.median(a4, axis=0)
 a4_std = np.std(a4, axis=0)
 a5_median = np.median(a5, axis=0)
 a5_std = np.std(a5, axis=0)
+a6_median = np.median(a6, axis=0)
+a6_std = np.std(a6, axis=0)
+a7_median = np.median(a7, axis=0)
+a7_std = np.std(a7, axis=0)
 
 #plt.errorbar(x, a_median, a_std, label="Vincent")
 plt.errorbar(x, a2_median, a2_std, label="Granularity 0.001")
 plt.errorbar(x, a3_median, a3_std, label="Granularity 0.01")
 plt.errorbar(x, a4_median, a4_std, label="Granularity 0.1")
 plt.errorbar(x, a5_median, a5_std, label="Granularity 0.25")
-#plt.errorbar(x, a6_median, a6_std, label="Outliers > 10")
-#plt.errorbar(x, a7_median, a7_std, label="Outliers > 20")
+plt.errorbar(x, a6_median, a6_std, label="Granularity 0.5")
+plt.errorbar(x, a7_median, a7_std, label="Granularity 1.0")
 plt.xlabel("Relative time")
 plt.ylabel("Accuracy")
-plt.title("Learning curve using mixture of linear regressions with one feature")
+plt.title("Learning curve using mixture of 2 linear regressions (outlier < 2)")
 #plt.title("Learning curve using gaussian processes with one feature")
 plt.grid()
 plt.legend(loc='best')
@@ -65,6 +73,10 @@ with open("data/rmse_outlier_2_granularity_0.1.pkl", 'rb') as f:
     r4 = cp.load(f)
 with open("data/rmse_outlier_2_granularity_0.25.pkl", 'rb') as f:
     r5 = cp.load(f)
+with open("data/rmse_outlier_2_granularity_0.5.pkl", 'rb') as f:
+    r6 = cp.load(f)
+with open("data/rmse_outlier_2_granularity_1.pkl", 'rb') as f:
+    r7 = cp.load(f)
 
 #r_median = np.median(r, axis=0)
 #r_std = np.std(r, axis=0)
@@ -76,17 +88,21 @@ r4_median = np.median(r4, axis=0)
 r4_std = np.std(r4, axis=0)
 r5_median = np.median(r5, axis=0)
 r5_std = np.std(r5, axis=0)
+r6_median = np.median(r6, axis=0)
+r6_std = np.std(r6, axis=0)
+r7_median = np.median(r7, axis=0)
+r7_std = np.std(r7, axis=0)
 
 #plt.errorbar(x, r_median, r_std)
 plt.errorbar(x, r2_median, r2_std, label="Granularity 0.001")
 plt.errorbar(x, r3_median, r3_std, label="Granularity 0.01")
 plt.errorbar(x, r4_median, r4_std, label="Granularity 0.1")
 plt.errorbar(x, r5_median, r5_std, label="Granularity 0.25")
-#plt.errorbar(x, r6_median, r6_std, label="Outliers > 10")
-#plt.errorbar(x, r7_median, r7_std, label="Outliers > 20")
+plt.errorbar(x, r6_median, r6_std, label="Granularity 0.5")
+plt.errorbar(x, r7_median, r7_std, label="Granularity 1.0")
 plt.xlabel("Relative time")
 plt.ylabel("RMSE")
-plt.title("Learning curve using mixture of linear regressions with one feature")
+plt.title("Learning curve using mixture of 2 linear regressions (outlier < 2)")
 #plt.title("Learning curve using gaussian processes with one feature")
 plt.grid()
 plt.legend(loc=1)
