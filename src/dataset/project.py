@@ -1,7 +1,7 @@
 from .sample import Sample
 import numpy as np
 import matplotlib
-matplotlib.use('TKAgg')
+#matplotlib.use('TKAgg')
 import matplotlib.pyplot as plt
 # import matplotlib
 # matplotlib.rcParams['figure.figsize'] = (18,8)
