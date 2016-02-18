@@ -23,7 +23,7 @@ def subsample(t, granularity):
         return np.linspace(t0, t, n_samples, dtype=int)
 
 
-def one_run(projects_train, projects_test, outlier_threshold, granularity):
+def one_run(projects_train, projects_test, K, outlier_threshold, granularity):
     rmse_failed_run = []
     rmse_success_run = []
     rmse_run = []
@@ -33,7 +33,7 @@ def one_run(projects_train, projects_test, outlier_threshold, granularity):
     bar.start()
     for i, rel_t in enumerate(relative_time):
         # Data
-        t = int(np.ceil(rel_t * 999))
+        t = int(rel_t * 999)
         samples = subsample(t, granularity)
         t = len(samples)
         T = 999
@@ -52,11 +52,10 @@ def one_run(projects_train, projects_test, outlier_threshold, granularity):
         #X_test = X_test / X_max[np.newaxis, :]
 
         # Hyperparameters
-        K = 2
         beta = 0.0001
         epsilon = 1e0
         lam = 0
-        iterations = 25
+        iterations = 50
         random_restarts = None
 
         mls = LeastSquaresMixture(X_train, y_train,
@@ -78,7 +77,7 @@ def one_run(projects_train, projects_test, outlier_threshold, granularity):
     return rmse_failed_run, rmse_success_run, rmse_run, accuracy_run
 
 
-def learning_curve(seed=2, runs=10, light=False, outlier_threshold=10, granularity=1.0):
+def learning_curve(seed=2, runs=10, light=False, K=2, outlier_threshold=10, granularity=1.0):
     sk = Sidekick(data_dir=data_dir, seed=seed)
     sk.load(light=light)
 
@@ -92,7 +91,7 @@ def learning_curve(seed=2, runs=10, light=False, outlier_threshold=10, granulari
         projects_validation = projects_test[:floor(n_test*3/5)]
         projects_test = projects_test[floor(n_test*3/5):]
 
-        _, _, rmse_run, accuracy_run = one_run(projects_train, projects_test, outlier_threshold, granularity)
+        _, _, rmse_run, accuracy_run = one_run(projects_train, projects_test, K, outlier_threshold, granularity)
         # rmse_failed_all.append(rmse_failed_run)
         # rmse_success_all.append(rmse_success_run)
         rmse_all.append(rmse_run)
@@ -101,16 +100,18 @@ def learning_curve(seed=2, runs=10, light=False, outlier_threshold=10, granulari
         #     cp.dump(rmse_failed_all, f)
         # with open('rmse_success_outlier_%s.pkl' % outlier_threshold, 'wb') as f:
         #     cp.dump(rmse_success_all, f)
-        with open('rmse_outlier_%s_granularity_%s.pkl' % (outlier_threshold, granularity), 'wb') as f:
+        with open('rmse_K_%s_outlier_%s_granularity_%s.pkl' % (K, outlier_threshold, granularity), 'wb') as f:
             cp.dump(rmse_all, f)
-        with open('accuracy_outlier_%s_granularity_%s.pkl' % (outlier_threshold, granularity), 'wb') as f:
+        with open('accuracy_K_%s_outlier_%s_granularity_%s.pkl' % (K, outlier_threshold, granularity), 'wb') as f:
             cp.dump(accuracy_all, f)
 
     return rmse_failed_all, rmse_success_all, rmse_all, accuracy_all
 
-# Granularity: [0.001, 0.01, 0.1, 0.25, 0.5, 0.8, 1]
+# Granularity: [0.001, 0.01, 0.1, 0.25, 0.5, 1]
+# Components:  [2, 3, 5, 10]
 rmse_failed_all, rmse_success_all, rmse_all, accuracy_all = learning_curve(seed=2,
                                                                            runs=10,
                                                                            light=False,
+                                                                           K=10,
                                                                            outlier_threshold=2,
-                                                                           granularity=0.001)
+                                                                           granularity=0.1)
