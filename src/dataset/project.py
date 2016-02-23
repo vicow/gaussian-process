@@ -17,6 +17,7 @@ class Project(Sample):
         self.successful = project[2] == 1
         self.start_date = project[3]
         self.deadline = project[4]
+        self.duration = self.deadline - self.start_date
         self.time = np.array([s[0] for s in status])
         self.money = np.array([s[1] for s in status])
         self.backers = np.array([s[2] for s in status])
