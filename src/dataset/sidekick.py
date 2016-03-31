@@ -46,7 +46,7 @@ class Sidekick(Dataset):
         Allows:
         >>>> sk = Sidekick()
         >>>> for project in sk:
-        >>>>    print project
+        >>>>    print(project)
 
         :return:
         """
@@ -73,11 +73,13 @@ class Sidekick(Dataset):
                 projects = np.load('%s/projects.npy' % (self.data_dir, ))
                 print('Loading statuses...')
                 statuses = self._load_binary('%s/statuses.pkl' % (self.data_dir, ))
+                print('Loading tweets...')
+                tweets = np.load('%s/tweets.npy' % (self.data_dir, ))
                 assert(len(projects) == len(statuses))
 
                 print('Converting to project instances...')
                 for i, p in enumerate(projects):
-                    project = Project(p, statuses[i])
+                    project = Project(p, statuses[i], tweets[i])
                     self.data.append(project)
 
                 self._save_binary("%s/complete.pkl" % self.data_dir, self.data)

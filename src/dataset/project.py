@@ -8,20 +8,33 @@ import matplotlib.pyplot as plt
 # matplotlib.rcParams['font.size'] = 16
 # matplotlib.rcParams['legend.fontsize'] = 16
 
+
 class Project(Sample):
-    def __init__(self, project, status):
+    def __init__(self, project, status, tweets):
         super(Sample, self).__init__()
         self.data_dir += "/sidekick"
+
+        # Project
         self.project_id = str(project[0])
         self.goal = project[1]
         self.successful = project[2] == 1
         self.start_date = project[3]
         self.deadline = project[4]
         self.duration = self.deadline - self.start_date
+
+        # Status
         self.time = np.array([s[0] for s in status])
         self.backers = np.array([s[2] for s in status])
         self._money = np.array([s[1] for s in status])
         self._normalized = True
+
+        # Tweets
+        self.tweets_time = np.array([t[0] for t in tweets])
+        self.number_tweets = np.array([t[1] for t in tweets])
+        self.number_tweets_replies = np.array([t[2] for t in tweets])
+        self.number_retweets = np.array([t[3] for t in tweets])
+        self.estimated_backers_number = np.array([t[4] for t in tweets])
+        self.number_tweeting_users = np.array([t[5] for t in tweets])
 
     def __str__(self):
         """
