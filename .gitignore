@@ -9,6 +9,7 @@ data/vincent/result*
 
 # Project files
 data/sidekick/*
+data/vincent/*
 
 ### IPythonNotebook ###
 # Temporary data
