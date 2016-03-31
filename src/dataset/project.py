@@ -19,11 +19,54 @@ class Project(Sample):
         self.deadline = project[4]
         self.duration = self.deadline - self.start_date
         self.time = np.array([s[0] for s in status])
-        self.money = np.array([s[1] for s in status])
         self.backers = np.array([s[2] for s in status])
+        self._money = np.array([s[1] for s in status])
+        self._normalized = True
 
     def __str__(self):
+        """
+        Project string description.
+        :return: Project ID is STATE
+        """
         return "Project %s is %s" % (self.project_id, "successful" if self.successful else "failed")
+
+    @property
+    def normalized(self):
+        """
+        Getter of normalized attribute.
+
+        :return: Whether the project uses normalized money
+        """
+        return self._normalized
+
+    @normalized.setter
+    def normalized(self, value):
+        """
+        Setter of normalized attribute.
+
+        :param value: Whether to use normalized money
+        """
+        self._normalized = value
+
+    @property
+    def money(self):
+        """
+        Getter of money attribute.
+
+        :return: Normalized or un-normalized money.
+        """
+        if self._normalized:
+            return self._money
+        else:
+            return self._money * self.goal
+
+    @money.setter
+    def money(self, value):
+        """
+        Setter of money attribute
+        :param value: Array of money
+        """
+        self._money = value
 
     def split(self, x, y, threshold=0.8):
         """
