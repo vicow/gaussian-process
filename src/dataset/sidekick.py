@@ -57,32 +57,33 @@ class Sidekick(Dataset):
     # Load data
     ###########
 
-    def load(self, light=False):
+    def load(self, light=False, update=False):
         """
         Load Sidekick data.
+
+        :param light:   Whether to load a light version of the data set (1000 projects)
+        :param update:  Whether to update the saved data (if the structure of the Project class changes for instance)
         """
         if light:
             print("Loading light data set (1000 data points)...")
             self.data = self._load_binary('%s/light.pkl' % self.data_dir)
         else:
-            print("Loading data set...")
-            self.data = self._load_binary('%s/complete.pkl' % (self.data_dir, ))
+            if update:
+                print('Loading projects...')
+                projects = np.load('%s/projects.npy' % (self.data_dir, ))
+                print('Loading statuses...')
+                statuses = self._load_binary('%s/statuses.pkl' % (self.data_dir, ))
+                assert(len(projects) == len(statuses))
 
-            # print('Loading projects...')
-            # projects = np.load('%s/projects.npy' % (self.data_dir, ))
-            # print('Loading statuses...')
-            # statuses = self._load_binary('%s/statuses.pkl' % (self.data_dir, ))
-            # assert(len(projects) == len(statuses))
-            #
-            # print('Converting to project instances...')
-            # for i, p in enumerate(projects):
-            #     project = Project(p, statuses[i])
-            #     self.data.append(project)
-            #
-            # self._save_binary("%s/complete.pkl" % self.data_dir, self.data)
+                print('Converting to project instances...')
+                for i, p in enumerate(projects):
+                    project = Project(p, statuses[i])
+                    self.data.append(project)
 
-            # Convert to numpy arrays if needed
-            # self.statuses = np.array(self.statuses)
+                self._save_binary("%s/complete.pkl" % self.data_dir, self.data)
+            else:
+                print("Loading data set...")
+                self.data = self._load_binary('%s/complete.pkl' % (self.data_dir, ))
 
         # Remove the one that have bugs due to the crawler or kickstarter
         self.data = [p for p in self.data if p.project_id != "564047599"]
