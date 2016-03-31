@@ -1,3 +1,6 @@
+# Ignore PNG
+*.png
+
 # Ignore PDF
 *.pdf
 
