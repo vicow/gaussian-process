@@ -38,7 +38,10 @@ def plot_data(data, title, x_label, y_label, args):
     for d in data:
         y = np.median(d["y"], axis=0) * 100 if "y" in d else d["y_value"]
         y_err = np.std(d["y"], axis=0) * 100 if "y" in d else d["y_err"]
-        plt.errorbar(d["x"], y, y_err, label=d["plot_label"])
+        granularity = ""
+        if "args" in d:
+            granularity += " " + r'$\gamma = %s$' % d["args"]["granularity"]
+        plt.errorbar(d["x"], y, y_err, label=d["plot_label"] + granularity)
     plt.xlabel(x_label)
     plt.ylabel(y_label)
     plt.title(title)
@@ -46,8 +49,11 @@ def plot_data(data, title, x_label, y_label, args):
     plt.grid()
     if args.metric == "accuracy":
         plt.ylim([plt.ylim()[0], 100])
-    plt.savefig("fig/%s.pdf" % "-".join([args.label, args.metric, "-".join(args.folder.split("/")[1:])]))
+    fig_name = "fig/%s.pdf" % "-".join([args.label, args.metric, "-".join(args.folder.split("/")[1:])])
+    plt.savefig(fig_name)
     plt.close()
+
+    print("Plotted %s" % fig_name)
 
 
 def plot_money_time_series(args):
@@ -60,7 +66,7 @@ def plot_money_time_series(args):
     data = u.load_from_folder(args.folder, args.label, args.metric)
 
     # Load Sidekick results if we want accuracy
-    if args.metric == "accuracy":
+    if args.metric == "accuracy" and args.sidekick:
         sidekick_median = u.load_file("%s/vincent_reduced_dataset_accuracy_median.pkl" % args.folder) # vincent_accuracy_median.pkl
         sidekick_std = u.load_file("%s/vincent_reduced_dataset_accuracy_std.pkl" % args.folder) # vincent_accuracy_std.pkl
 
@@ -85,9 +91,10 @@ def plot_money_time_series(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--folder', default="data/all-features", help="Folder to load data from")
+    parser.add_argument('--folder', default="data/avg-increment-granularity", help="Folder to load data from")
     parser.add_argument('--label', default="linear-regression", help="Label to identify the experiment")
     parser.add_argument('--metric', default="accuracy", help="Which metric to use")
+    parser.add_argument('--sidekick', default=False, help="Plot sidekick results")
 
     args = parser.parse_args()
 
