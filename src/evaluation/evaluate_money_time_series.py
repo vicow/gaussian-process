@@ -1,9 +1,9 @@
 from __future__ import print_function
-import os
-import sys
-#sys.path.insert(0, os.path.abspath('../utils/'))  # Add sibling to Python path
-#sys.path.insert(0, os.path.abspath('../src/'))  # Add sibling to Python path
+# sys.path.insert(0, os.path.abspath('../utils/'))  # Add sibling to Python path
+# sys.path.insert(0, os.path.abspath('../src/'))  # Add sibling to Python path
+import time
 import numpy as np
+
 from src.dataset import Sidekick
 from utils import ProgressBar, Utils
 from sklearn import linear_model
@@ -27,6 +27,7 @@ def _average_increment(money):
     else:
         return 0
 
+
 def _get_extractor(features):
     """
     Return the corresponding feature extractor.
@@ -34,16 +35,16 @@ def _get_extractor(features):
     :param features:    Key to select a feature extractor
     :return:            Function to extract features from an array
     """
-    if features == "last_sample" or features is None:
+    if features == "last-sample" or features is None:
         return lambda a: a[-1]
     elif features == "derivative":
         return lambda a: a[-1] / len(a)
-    elif features == "average_increment":
+    elif features == "average-increment":
         return lambda a: _average_increment(a)
-    elif features == "max_increment":
+    elif features == "max-increment":
         return lambda a: np.max(np.diff(a))
     else:
-        raise AttributeError("Undefined attribute %s" % features)
+        raise AttributeError("Undefined attribute %s, should be one of 'last-sample', 'derivative', 'average-increment', 'max-increment'" % features)
 
 
 def subsample(t, granularity):
@@ -100,12 +101,13 @@ def _evaluate(X_test, y_test, projects_test, model, normalized):
     return rmse_total, accuracy
 
 
-def _one_run(projects_train, projects_test, features, outlier_threshold, normalized, granularity):
+def _one_run(projects_train, projects_test, relative_time, features, outlier_threshold, normalized, granularity):
     """
     Run the experiment once for an increasing time for some given parameters.
 
     :param projects_train:      Training projects set
     :param projects_test:       Test projects set
+    :param realtive_time:       Relative time, used as x axis
     :param features:            Features to extract from money time series
     :param outlier_threshold:   Threshold to discard outliers
     :param normalized:          Whether to use normalized money
@@ -114,7 +116,6 @@ def _one_run(projects_train, projects_test, features, outlier_threshold, normali
     """
     rmse_run = []
     accuracy_run = []
-    relative_time = np.linspace(0.025, 1, 40)
     bar = ProgressBar(end_value=len(relative_time), text="Time steps", count=True)
     bar.start()
 
@@ -167,6 +168,23 @@ def experiment(args):
     sk = Sidekick(data_dir=data_dir, seed=args.seed)
     sk.load(light=args.light)
 
+    relative_time = np.linspace(0.025, 1, 40)
+
+    # Construct data dict
+    data_rmse = {
+        "plot_label": args.features,
+        "x": relative_time,
+        "y": [],
+        "args": vars(args),
+        "timestamp": time.time()
+    }
+    data_accuracy = {
+        "plot_label": args.features,
+        "x": relative_time,
+        "y": [],
+        "args": vars(args),
+        "timestamp": time.time()
+    }
     rmse_all = []
     accuracy_all = []
     for r in range(args.runs):
@@ -181,43 +199,39 @@ def experiment(args):
         # projects_test = projects_test[floor(n_test*3/5):]
 
         # Run the experiment once
-        rmse_run, accuracy_run = _one_run(projects_train, projects_test, features,
+        rmse_run, accuracy_run = _one_run(projects_train, projects_test, relative_time, features,
                                           args.outlierThreshold, args.normalized, args.granularity)
 
         # Record the results
         rmse_all.append(rmse_run)
         accuracy_all.append(accuracy_run)
 
-        # Save the results to disk
-        args.metric = "rmse"
-        u.save_binary(rmse_all, vars(args))
-        args.metric = "accuracy"
-        u.save_binary(accuracy_all, vars(args))
+    data_rmse["y"] = rmse_all
+    data_accuracy["y"] = accuracy_all
+
+    # Save the results to disk
+    args.metric = "rmse"
+    u.save_args(data_rmse, vars(args))
+    args.metric = "accuracy"
+    u.save_args(data_accuracy, vars(args))
 
     return rmse_all, accuracy_all
 
 
-def _check_features(features):
-    allowed_features = ["last-sample", "derivative", "average-increment", "max-increment"]
-    if features not in allowed_features:
-        raise AttributeError("Specified features extractor %s not allowed" % features)
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('label', default="linear-regression", help="Label to identify the experiment")
+    parser.add_argument('--label', default="linear-regression", help="Label to identify the experiment")
     parser.add_argument('--seed', default=2, help="Seed to use when shuffling the data set")
     parser.add_argument('--runs', default=10, help="Number of times to run the experiment")
     parser.add_argument('--light', default=False, help="Whether to use a light data set (1000 projects)")
     parser.add_argument('--outlierThreshold', default=10000, help="Threshold of outliers to discard")
     parser.add_argument('--normalized', default=False, help="Whether to use the normalized money")
     parser.add_argument('--granularity', default=1.0, help="Level of granularity")
-    parser.add_argument('__features', default="max-increment", help="Which features extractor to use")
+    parser.add_argument('--features', default="max-increment", help="Which features extractor to use")
 
     args = parser.parse_args()
 
     u.args_sanity_check(vars(args))
-
-    _check_features(args.features)
 
     rmse_all, accuracy_all = experiment(args)
