@@ -76,9 +76,9 @@ def subsample(t, granularity):
     t0 = 0
     n_samples = int(np.ceil(granularity * t))
     if n_samples == 1:
-        return [t]
+        return [t-1]
     else:
-        return np.linspace(t0, t, n_samples, dtype=int)
+        return np.linspace(t0, t-1, n_samples, dtype=int)
 
 
 def _evaluate(X_test, y_test, projects_test, model, normalized):
@@ -98,8 +98,7 @@ def _evaluate(X_test, y_test, projects_test, model, normalized):
         if normalized:
             goal = 1
         else:
-            p = projects_test[i]
-            goal = p.goal
+            goal = projects_test[i].goal
         x_test = np.expand_dims(x_test, axis=0)
         y_pred = model.predict(x_test)
         y_pred = y_pred[0]
