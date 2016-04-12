@@ -20,10 +20,24 @@ def _average_increment(money):
     :param money:   Time series
     :return:        Average increment
     """
-    d = np.diff(money)
-    increments = [i for i in d if i != 0]
-    if len(increments) > 0:
-        return np.mean(increments)
+    if len(money) > 0:
+        d = np.diff(money)
+        increments = [i for i in d if i != 0]
+        if len(increments) > 0:
+            return np.mean(increments)
+        else:
+            return 0
+    else:
+        return 0
+
+
+def _max_increment(money):
+    if len(money) > 0:
+        d = np.diff(money)
+        if len(d) == 0:
+            return 0
+        else:
+            return np.max(np.diff(money))
     else:
         return 0
 
@@ -42,7 +56,7 @@ def _get_extractor(features):
     elif features == "average-increment":
         return lambda a: _average_increment(a)
     elif features == "max-increment":
-        return lambda a: np.max(np.diff(a))
+        return lambda a: _max_increment(a)
     else:
         raise AttributeError("Undefined attribute %s, should be one of 'last-sample', 'derivative', 'average-increment', 'max-increment'" % features)
 

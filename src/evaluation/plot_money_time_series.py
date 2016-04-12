@@ -34,6 +34,7 @@ def plot_data(data, title, x_label, y_label, args):
     :param title:       Title of plot
     :param x_label:     X label
     :param y_label:     Y label
+    :param args:        Arguments of the script
     """
     for d in data:
         y = np.median(d["y"], axis=0) * 100 if "y" in d else d["y_value"]
@@ -91,7 +92,7 @@ def plot_money_time_series(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--folder', default="data/avg-increment-granularity", help="Folder to load data from")
+    parser.add_argument('--folder', default="data/average-increment-granularity", help="Folder to load data from")
     parser.add_argument('--label', default="linear-regression", help="Label to identify the experiment")
     parser.add_argument('--metric', default="accuracy", help="Which metric to use")
     parser.add_argument('--sidekick', default=False, help="Plot sidekick results")
