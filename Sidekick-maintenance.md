@@ -22,7 +22,7 @@ Watch the log console for these four scripts with:
 screen -R
 ````
  
-This will open a [Screen](https://developer.apple.com/library/mac/documentation/Darwin/Reference/ManPages/man1/screen.1.html) window with four tabs. To navigate between tabs, use `Ctrl-Z n` or `Ctrl <tab number>` where `<tab number>` is 0, 1, 2 or 3. You can stop a script with `Ctrl-C`. 
+This will open a [Screen](https://developer.apple.com/library/mac/documentation/Darwin/Reference/ManPages/man1/screen.1.html) window with four tabs. To navigate between tabs, use `Ctrl-Z n` or `Ctrl-Z <tab number>` where `<tab number>` is 0, 1, 2 or 3. You can stop a script with `Ctrl-C`. 
  
 The activate the virtual environment, do:
 
@@ -48,3 +48,5 @@ kill -9 [pid-sshfs-process]                                     # Kill it
 fusermount -u /home/90days                                      # Unmount the folder
 sshfs kristof@icsil1-access2.epfl.ch:/home/90days /home/90days  # Mount the folder
 ````
+
+Finally, to exit the `screen` window, while keeping the script running, do `Ctrl-Z d`.
